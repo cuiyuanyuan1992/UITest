@@ -8,8 +8,7 @@ import org.openqa.selenium.TakesScreenshot;
 import org.testng.ITestResult;
 import org.testng.TestListenerAdapter;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -20,7 +19,9 @@ public class ScreenshotListener extends TestListenerAdapter {
         BaseCase baseCase = (BaseCase) iTestResult.getInstance();
         AppiumDriver driver = baseCase.getDriver();
         // 获取屏幕截图
-        File srcFile =  takePhoto(driver);
+        byte[] byteArray =  takePhoto(driver);
+        InputStream in = new ByteArrayInputStream(byteArray);
+
         // System.out.println(srcFile.getAbsolutePath().toString());
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_hhmmss");
         File location = new File("screenshots");
@@ -29,19 +30,31 @@ public class ScreenshotListener extends TestListenerAdapter {
                 new File(location.getAbsolutePath() + File.separator + dest + "_" + dateFormat.format(new Date()) + ".png");
         System.out.println("截图位置：");
         System.out.println("----------------- file is " + targetFile.getPath());
-        try
-        {
-            FileUtils.copyFile(srcFile, targetFile);
-        }
-        catch (IOException e)
-        {
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(targetFile);
+            int len = 0;
+            byte[] buf = new byte[1024];
+            while ((len = in.read(buf)) != -1) {
+                fos.write(buf, 0, len);
+            }
+            fos.flush();
+        } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if (null != fos) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
-    @Attachment(value = "失败截图如下：",type = "image/png")
-    public File  takePhoto(AppiumDriver driver){
-        File screenshotAs = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+    @Attachment("失败截图如下：")
+    public byte[]  takePhoto(AppiumDriver driver){
+        byte[] screenshotAs = ((TakesScreenshot)driver).getScreenshotAs(OutputType.BYTES);
         return screenshotAs;
     }
 }
