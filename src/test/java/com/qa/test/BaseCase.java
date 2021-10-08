@@ -3,6 +3,8 @@ package com.qa.test;
 import com.qa.common.CommandUtils;
 import com.qa.common.InitEnv;
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.MobileElement;
+import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.remote.MobileCapabilityType;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -17,9 +19,9 @@ import java.util.Map;
 @Slf4j
 @Listeners({ScreenshotListener.class})
 public class BaseCase extends InitEnv {
-    public static AppiumDriver driver;
+    public static AppiumDriver<MobileElement> driver;
 
-    public AppiumDriver getDriver(){
+    public AppiumDriver<MobileElement> getDriver(){
         return driver;
     }
 
@@ -35,7 +37,7 @@ public class BaseCase extends InitEnv {
         desiredCapabilities.setCapability("bundleId", "com.taobao.tmall");
         desiredCapabilities.setCapability(MobileCapabilityType.UDID, deviceInfo.get("udid"));
         URL url = new URL("http://127.0.0.1:4723/wd/hub");
-        driver = new AppiumDriver(url, desiredCapabilities);
+        driver = new IOSDriver<MobileElement>(url, desiredCapabilities);
 
         CommandUtils utils = new CommandUtils();
         utils.sleep(5);
